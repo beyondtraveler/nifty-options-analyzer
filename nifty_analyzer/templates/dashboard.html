@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NIFTY Options Analyzer</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f3f6fb; margin:0; padding:0; }
+    .container { max-width:900px; margin:20px auto; background:#fff; padding:24px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.08); }
+    h1 { margin-top:0; color:#1c3d6e; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .card { border:1px solid #dbe4f0; border-radius:8px; padding:12px; background:#fafcff; }
+    .label { color:#6b7280; font-size:0.9rem; }
+    .value { font-size:1.2rem; font-weight:700; margin-top:4px; }
+    .bias-bullish { color:#0f8a3a; }
+    .bias-bearish { color:#c92a2a; }
+    .bias-neutral { color:#a16900; }
+    table { width:100%; border-collapse:collapse; margin-top:16px; }
+    th, td { border:1px solid #e5e7eb; padding:8px; text-align:center; font-size:0.9rem; }
+    th { background:#eef3fb; }
+    .footer { margin-top:12px; color:#6b7280; font-size:0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>NIFTY Options Analyzer Dashboard</h1>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Current Time</div>
+        <div class="value">{{ current_time }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Market Bias</div>
+        {% set bias_cls = 'bias-neutral' %}
+        {% if snapshot.market_bias == 'Bullish' %}
+          {% set bias_cls = 'bias-bullish' %}
+        {% elif snapshot.market_bias == 'Bearish' %}
+          {% set bias_cls = 'bias-bearish' %}
+        {% endif %}
+        <div class="value {{ bias_cls }}">{{ snapshot.market_bias }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Top Resistance (Highest Call OI)</div>
+        <div class="value">{{ snapshot.top_resistance if snapshot.top_resistance else 'N/A' }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Top Support (Highest Put OI)</div>
+        <div class="value">{{ snapshot.top_support if snapshot.top_support else 'N/A' }}</div>
+      </div>
+    </div>
+
+    <h2>ATM Analysis</h2>
+    {% if snapshot.atm_analysis %}
+      <table>
+        <tr>
+          <th>ATM Strike</th>
+          <th>Call LTP</th>
+          <th>Put LTP</th>
+          <th>Call OI</th>
+          <th>Put OI</th>
+          <th>Call Build-up</th>
+          <th>Put Build-up</th>
+        </tr>
+        <tr>
+          <td>{{ snapshot.atm_analysis.strike }}</td>
+          <td>{{ snapshot.atm_analysis.call_ltp }}</td>
+          <td>{{ snapshot.atm_analysis.put_ltp }}</td>
+          <td>{{ snapshot.atm_analysis.call_oi }}</td>
+          <td>{{ snapshot.atm_analysis.put_oi }}</td>
+          <td>{{ snapshot.atm_analysis.call_build_up }}</td>
+          <td>{{ snapshot.atm_analysis.put_build_up }}</td>
+        </tr>
+      </table>
+    {% else %}
+      <p>No ATM data available yet.</p>
+    {% endif %}
+
+    {% if snapshot.errors %}
+      <div class="footer">
+        <strong>Recent fetch warnings:</strong>
+        {{ snapshot.errors | join(' | ') }}
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
